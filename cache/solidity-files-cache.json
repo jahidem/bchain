@@ -1,0 +1,77 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "F:\\bbchain\\scripts\\contracts\\BasicMedicalContract.sol": {
+      "lastModificationDate": 1740058461667,
+      "contentHash": "9490dcf7134c2514e36356824480db7e",
+      "sourceName": "contracts/BasicMedicalContract.sol",
+      "solcConfig": {
+        "version": "0.8.28",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.28"
+      ],
+      "artifacts": [
+        "BasicMedicalContract"
+      ]
+    },
+    "F:\\bbchain\\scripts\\contracts\\LightweightMedicalContract.sol": {
+      "lastModificationDate": 1740055494702,
+      "contentHash": "f46113dfdcbcc215f6288041120e2e27",
+      "sourceName": "contracts/LightweightMedicalContract.sol",
+      "solcConfig": {
+        "version": "0.8.28",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.28"
+      ],
+      "artifacts": [
+        "LightweightMedicalContract"
+      ]
+    }
+  }
+}
