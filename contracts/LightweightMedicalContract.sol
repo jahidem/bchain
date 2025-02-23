@@ -13,11 +13,13 @@ contract LightweightMedicalContract {
     struct Patient {
         uint256 id;
         bytes32 dataHash;
+        string ipfs_hash;
     }
 
     struct Doctor {
         uint256 id;
         bytes32 dataHash;
+        string ipfs_hash;
     }
 
     mapping(uint256 => Patient) public patients;
@@ -28,6 +30,7 @@ contract LightweightMedicalContract {
 
     function addDoctor(
         uint256 _id,
+        string memory _ipfs_hash,
         string memory _name,
         string memory _credentials,
         string memory _gender,
@@ -38,14 +41,15 @@ contract LightweightMedicalContract {
         require(!doctorExists(_id), "Doctor already registered");
         doctorCount++;
         bytes32 dataHash = keccak256(
-            abi.encodePacked(_id, _name, _credentials, _gender, _hospitalName, _country, _specialty)
+            abi.encodePacked(_id,_ipfs_hash, _name, _credentials, _gender, _hospitalName, _country, _specialty)
         );
 
-        doctors[_id] = Doctor(_id, dataHash);
+        doctors[_id] = Doctor(_id, dataHash, _ipfs_hash);
     }
 
     function addPatient(
         uint256 _id,
+        string memory _ipfs_hash,
         uint256 _age,
         uint256 _highBP,
         uint256 _highChol,
@@ -58,6 +62,7 @@ contract LightweightMedicalContract {
         bytes32 dataHash = keccak256(
           abi.encodePacked(
               _id,
+              _ipfs_hash,
               _age,
               _highBP,
               _highChol,
@@ -68,7 +73,7 @@ contract LightweightMedicalContract {
           )
         );
 
-        patients[_id] = Patient(_id, dataHash);
+        patients[_id] = Patient(_id, dataHash, _ipfs_hash);
     }
 
     function getPatientHash(uint256 patientId) public view returns (bytes32) {

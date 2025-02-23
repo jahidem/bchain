@@ -1,7 +1,14 @@
 const hre = require("hardhat");
 const fs = require("fs");
 const csv = require("csv-parser");
+const { PinataSDK } = require("pinata-web3");
 const path = require("path");
+require("dotenv").config();
+
+const pinata = new PinataSDK({
+  pinataJwt: process.env.PINATA_JWT,
+  pinataGateway: process.env.GATEWAY_URL
+});
 
 // Function to read the CSV file and parse the data into an array
 async function readCSV(filePath) {
@@ -13,6 +20,29 @@ async function readCSV(filePath) {
             .on("end", () => resolve(results))
             .on("error", (err) => reject(err));
     });
+}
+
+// upload to ipfs
+async function uploadToPinata(patientData) {
+  try {
+    const jsonData = JSON.stringify(patientData, null, 2);
+    const filePath = path.join(__dirname, "data.txt");
+
+    fs.writeFileSync(filePath, jsonData, "utf-8");
+
+    const blob = new Blob([fs.readFileSync(filePath)], { type: "text/plain" });
+    const file = new File([blob], "data.txt");
+
+    const uploadResponse = await pinata.upload.file(file);
+
+    fs.unlinkSync(filePath);
+
+    console.log("File uploaded to Pinata. IPFS Hash:", uploadResponse.IpfsHash);
+    return uploadResponse.IpfsHash;
+  } catch (error) {
+    console.error("Error uploading to Pinata:", error);
+    return null;
+  }
 }
 
 // Function to measure execution time of an asynchronous function
@@ -34,7 +64,7 @@ async function main() {
     // Read CSV files
     const patients = await readCSV("./data/patient.csv");
     const doctors = await readCSV("./data/doctor.csv");
-    const dataSize = 10000
+    const dataSize = 3
 
     // Initialize storage for JSON output
     const performanceMetrics = {
@@ -57,18 +87,31 @@ async function main() {
             console.log(`Skipping invalid patient data for ID ${patientData.patient_id}`);
             continue;
         }
+        const patient = {
+                patient_id: parseInt(patientData.patient_id),
+                age: parseInt(patientData.age),
+                highBP: parseInt(patientData.highBP),
+                highChol: parseInt(patientData.highChol),
+                cholCheck: parseInt(patientData.cholCheck),
+                bmi: parseInt(patientData.bmi),
+                smoker: parseInt(patientData.smoker),
+                stroke: parseInt(patientData.stroke)
+        }
+        const ipfs_hash = await uploadToPinata(patient);
 
         console.log(`Adding Patient ${patientData.patient_id}...`);
+
         const { result: txEth, executionTimeMs } = await measureExecutionTime(
             () => lightweightContract.addPatient(
-                parseInt(patientData.patient_id),
-                parseInt(patientData.age),
-                parseInt(patientData.highBP),
-                parseInt(patientData.highChol),
-                parseInt(patientData.cholCheck),
-                parseInt(patientData.bmi),
-                parseInt(patientData.smoker),
-                parseInt(patientData.stroke)
+                patient.patient_id,
+                ipfs_hash,
+                patient.age,
+                patient.highBP,
+                patient.highChol,
+                patient.cholCheck,
+                patient.bmi,
+                patient.smoker,
+                patient.stroke
             ),
             `Ethereum Patient ID ${patientData.patient_id}`
         );
@@ -102,17 +145,19 @@ async function main() {
     // doctors Ethereum contract
     console.log("\n📌 Doctors to Ethereum contract...");
     for (let i = 0; i < Math.min(dataSize, doctors.length); i++) {
-        const doctorData = doctors[i];
+        let doctorData = doctors[i];
 
         if (!doctorData.doctor_id || !doctorData.doctor_name) {
             console.log(`Skipping invalid doctor data for ID ${doctorData.doctor_id}`);
             continue;
         }
-
+        doctorData.doctor_id = parseInt(doctorData.doctor_id)
+        const ipfs_hash = await uploadToPinata(doctorData);
         console.log(`Adding Doctor ${doctorData.doctor_id}...`);
         const { result: txEth, executionTimeMs } = await measureExecutionTime(
             () => lightweightContract.addDoctor(
                 parseInt(doctorData.doctor_id),
+                ipfs_hash,
                 doctorData.doctor_name,
                 doctorData.crdntls,
                 doctorData.gender,
